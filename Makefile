@@ -55,7 +55,7 @@ build: ## Builds binary
 
 run: ## Runs binary local with environment in docker
 	${info Run app containered}
-	GIT_HASH=${FILE_HASH} docker compose -p ${PROJECT_NAME} up --build
+	GIT_HASH=${FILE_HASH} docker compose -p ${PROJECT_NAME} up --build -d
 
 migrate_new: ## Create new migration
 	migrate create -ext sql -dir migrations -seq data
