@@ -1,8 +1,8 @@
 package routes
 
 import (
-	"go_project_template/internal/logger"
-	"go_project_template/internal/service/sampler"
+	"i3_stat/internal/logger"
+	"i3_stat/internal/service/sampler"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/recover"
@@ -32,6 +32,9 @@ func InitAppRouter(log logger.AppLogger, service *sampler.Service, address strin
 func (s *Server) initRoutes() {
 	s.httpEngine.Get("/", func(ctx *fiber.Ctx) error {
 		return ctx.SendString("pong")
+	})
+	s.httpEngine.Get("/state", func(ctx *fiber.Ctx) error {
+		return ctx.SendString(s.service.GetState())
 	})
 }
 

@@ -10,10 +10,11 @@ import (
 )
 
 type AppConfig struct {
-	AppPort        int       `yaml:"app_port"`
-	MigratesFolder string    `yaml:"migrates_folder"`
-	ConfigDB       DBConf    `yaml:"conf_db"`
-	ConfigGraph    GraphConf `yaml:"conf_graph"`
+	AppPort             int       `yaml:"app_port"`
+	MigratesFolder      string    `yaml:"migrates_folder"`
+	CryptocompareAPIKey string    `yaml:"cryptocompare_api_key"`
+	ConfigDB            DBConf    `yaml:"conf_db"`
+	ConfigGraph         GraphConf `yaml:"conf_graph"`
 }
 
 type GraphConf struct {

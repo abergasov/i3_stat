@@ -3,7 +3,7 @@ package lru
 import (
 	"errors"
 	"fmt"
-	"go_project_template/internal/storage/cache/lru/utils"
+	"sampler/internal/storage/cache/lru/utils"
 
 	lru "github.com/hashicorp/golang-lru"
 )

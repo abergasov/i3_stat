@@ -2,14 +2,13 @@ package database
 
 import (
 	"fmt"
-	"go_project_template/internal/config"
+	"i3_stat/internal/config"
 	"time"
-
-	"github.com/jmoiron/sqlx"
 
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
+	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 )
 
@@ -36,7 +35,7 @@ func InitDBConnect(cnf *config.DBConf, migratesFolder string) (*DBConnect, error
 		return nil, fmt.Errorf("error ping to db: %w", err)
 	}
 	conn := &DBConnect{db}
-	if err = conn.migrate(migratesFolder); err != nil {
+	if err = conn.migrate(migratesFolder); err != nil && err != migrate.ErrNoChange {
 		return nil, fmt.Errorf("error migrate db: %w", err)
 	}
 	return conn, nil
