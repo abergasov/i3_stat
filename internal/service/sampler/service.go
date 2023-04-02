@@ -5,8 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"i3_stat/internal/logger"
+	"i3_stat/internal/models"
 	"io"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 
@@ -21,9 +23,8 @@ type Service struct {
 	compareAPIKey string
 	log           logger.AppLogger
 	priceMU       *sync.RWMutex
-	btcPrice      float64
-	ethPrice      float64
-	xchPrice      float64
+	observePrice  []models.Coin
+	observeList   []string
 }
 
 func InitService(log logger.AppLogger, compareAPIKey string) *Service {
@@ -31,6 +32,16 @@ func InitService(log logger.AppLogger, compareAPIKey string) *Service {
 		compareAPIKey: compareAPIKey,
 		log:           log.With(zap.String("service", "sampler")),
 		priceMU:       &sync.RWMutex{},
+		observeList: []string{
+			models.Bitcoin,
+			models.Ethereum,
+			//models.Atom,
+			//models.Polkadot,
+			models.Chia,
+		},
+	}
+	for _, tk := range srv.observeList {
+		srv.observePrice = append(srv.observePrice, models.Coin{Ticker: tk})
 	}
 	go srv.observePrices()
 	return srv
@@ -41,46 +52,24 @@ func (s *Service) observePrices() {
 	ticker := time.NewTicker(15 * time.Second)
 	for range ticker.C {
 		go s.getPrices()
+		println(s.GetState())
+
 	}
 }
 
 func (s *Service) getPrices() {
-	go s.getBTCPrice()
-	go s.getETHPrice()
-	go s.getXCHPrice()
-}
-
-func (s *Service) getBTCPrice() {
-	btcPrice, err := s.loadPrice("BTC")
-	if err != nil {
-		s.log.Error("failed to load BTC price", err)
-		return
+	for i := range s.observeList {
+		go func(index int, ticker string) {
+			assetPrice, err := s.loadPrice(ticker)
+			if err != nil {
+				s.log.Error("failed to load price", err, zap.String("ticker", ticker))
+				return
+			}
+			s.priceMU.Lock()
+			s.observePrice[index].Price = assetPrice
+			s.priceMU.Unlock()
+		}(i, s.observeList[i])
 	}
-	s.priceMU.Lock()
-	s.btcPrice = btcPrice
-	s.priceMU.Unlock()
-}
-
-func (s *Service) getXCHPrice() {
-	xchPrice, err := s.loadPrice("XCH")
-	if err != nil {
-		s.log.Error("failed to load XCH price", err)
-		return
-	}
-	s.priceMU.Lock()
-	s.xchPrice = xchPrice
-	s.priceMU.Unlock()
-}
-
-func (s *Service) getETHPrice() {
-	ethPrice, err := s.loadPrice("ETH")
-	if err != nil {
-		s.log.Error("failed to load ETH price", err)
-		return
-	}
-	s.priceMU.Lock()
-	s.ethPrice = ethPrice
-	s.priceMU.Unlock()
 }
 
 func (s *Service) loadPrice(targetCurrency string) (float64, error) {
@@ -120,5 +109,9 @@ func (s *Service) loadPrice(targetCurrency string) (float64, error) {
 func (s *Service) GetState() string {
 	s.priceMU.RLock()
 	defer s.priceMU.RUnlock()
-	return fmt.Sprintf("BTC: %.2f, ETH: %.2f, XCH: %.2f", s.btcPrice, s.ethPrice, s.xchPrice)
+	stringsList := make([]string, 0, len(s.observeList))
+	for _, t := range s.observePrice {
+		stringsList = append(stringsList, fmt.Sprintf("%s: %.2f", t.Ticker, t.Price))
+	}
+	return strings.Join(stringsList, ",")
 }
