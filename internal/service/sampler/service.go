@@ -113,5 +113,5 @@ func (s *Service) GetState() string {
 	for _, t := range s.observePrice {
 		stringsList = append(stringsList, fmt.Sprintf("%s: %.2f", t.Ticker, t.Price))
 	}
-	return strings.Join(stringsList, ",")
+	return strings.Join(stringsList, ", ")
 }
