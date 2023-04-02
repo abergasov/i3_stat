@@ -37,13 +37,17 @@ func InitService(log logger.AppLogger, compareAPIKey string) *Service {
 }
 
 func (s *Service) observePrices() {
-	go s.getBTCPrice()
-	go s.getETHPrice()
+	go s.getPrices()
 	ticker := time.NewTicker(15 * time.Second)
 	for range ticker.C {
-		s.getBTCPrice()
-		s.getETHPrice()
+		go s.getPrices()
 	}
+}
+
+func (s *Service) getPrices() {
+	go s.getBTCPrice()
+	go s.getETHPrice()
+	go s.getXCHPrice()
 }
 
 func (s *Service) getBTCPrice() {

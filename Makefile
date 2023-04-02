@@ -54,6 +54,7 @@ build: ## Builds binary
 	go build -o ./bin/binary ./cmd
 
 run: stop## Runs binary local with environment in docker
+	git pull origin master
 	${info Run app containered}
 	GIT_HASH=${FILE_HASH} docker compose -p ${PROJECT_NAME} up --build -d
 
