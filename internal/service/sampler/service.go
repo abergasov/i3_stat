@@ -62,13 +62,13 @@ func (s *Service) getBTCPrice() {
 }
 
 func (s *Service) getXCHPrice() {
-	btcPrice, err := s.loadPrice("XCH")
+	xchPrice, err := s.loadPrice("XCH")
 	if err != nil {
 		s.log.Error("failed to load XCH price", err)
 		return
 	}
 	s.priceMU.Lock()
-	s.btcPrice = btcPrice
+	s.xchPrice = xchPrice
 	s.priceMU.Unlock()
 }
 
