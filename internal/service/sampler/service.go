@@ -23,6 +23,7 @@ type Service struct {
 	priceMU       *sync.RWMutex
 	btcPrice      float64
 	ethPrice      float64
+	xchPrice      float64
 }
 
 func InitService(log logger.AppLogger, compareAPIKey string) *Service {
@@ -49,6 +50,17 @@ func (s *Service) getBTCPrice() {
 	btcPrice, err := s.loadPrice("BTC")
 	if err != nil {
 		s.log.Error("failed to load BTC price", err)
+		return
+	}
+	s.priceMU.Lock()
+	s.btcPrice = btcPrice
+	s.priceMU.Unlock()
+}
+
+func (s *Service) getXCHPrice() {
+	btcPrice, err := s.loadPrice("XCH")
+	if err != nil {
+		s.log.Error("failed to load XCH price", err)
 		return
 	}
 	s.priceMU.Lock()
@@ -104,5 +116,5 @@ func (s *Service) loadPrice(targetCurrency string) (float64, error) {
 func (s *Service) GetState() string {
 	s.priceMU.RLock()
 	defer s.priceMU.RUnlock()
-	return fmt.Sprintf("BTC: %.2f, ETH: %.2f", s.btcPrice, s.ethPrice)
+	return fmt.Sprintf("BTC: %.2f, ETH: %.2f, XCH: %.2f", s.btcPrice, s.ethPrice, s.xchPrice)
 }

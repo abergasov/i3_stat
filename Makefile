@@ -53,7 +53,7 @@ build: ## Builds binary
 	@echo "-- building binary"
 	go build -o ./bin/binary ./cmd
 
-run: ## Runs binary local with environment in docker
+run: stop## Runs binary local with environment in docker
 	${info Run app containered}
 	GIT_HASH=${FILE_HASH} docker compose -p ${PROJECT_NAME} up --build -d
 
