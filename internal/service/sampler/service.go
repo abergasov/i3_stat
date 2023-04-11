@@ -22,9 +22,9 @@ const (
 
 type Service struct {
 	compareAPIKeys   *list.List
-	compareAPIKeysMU *sync.Mutex
+	compareAPIKeysMU sync.Mutex
 	log              logger.AppLogger
-	priceMU          *sync.RWMutex
+	priceMU          sync.RWMutex
 	observePrice     []models.Coin
 	observeList      []string
 }
@@ -37,7 +37,6 @@ func InitService(log logger.AppLogger, compareAPIKey []string) *Service {
 	srv := &Service{
 		compareAPIKeys: apiList,
 		log:            log.With(zap.String("service", "sampler")),
-		priceMU:        &sync.RWMutex{},
 		observeList: []string{
 			models.Bitcoin,
 			models.Ethereum,
