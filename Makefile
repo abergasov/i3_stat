@@ -61,6 +61,8 @@ run: stop## Runs binary local with environment in docker
 migrate_new: ## Create new migration
 	migrate create -ext sql -dir migrations -seq data
 
+logs:
+	docker logs -f stater-app
 
 .PHONY: help install-lint test gogen lint stop dev_up build run init_repo migrate_new
 .DEFAULT_GOAL := help
