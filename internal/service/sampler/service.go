@@ -101,6 +101,7 @@ func (s *Service) loadPrice(targetCurrency string) (float64, error) {
 	}
 	var res map[string]float64
 	if err = json.Unmarshal(b, &res); err != nil {
+		s.log.Error("failed to unmarshal response body", err, zap.ByteString("body", b))
 		return 0, fmt.Errorf("failed to unmarshal response body: %w", err)
 	}
 	return res["USD"], nil

@@ -62,7 +62,7 @@ migrate_new: ## Create new migration
 	migrate create -ext sql -dir migrations -seq data
 
 logs:
-	docker logs -f stater-app
+	docker logs -f stater-app-1
 
 .PHONY: help install-lint test gogen lint stop dev_up build run init_repo migrate_new
 .DEFAULT_GOAL := help
