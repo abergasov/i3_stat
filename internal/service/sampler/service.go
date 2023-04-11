@@ -2,6 +2,7 @@ package sampler
 
 import (
 	"compress/gzip"
+	"container/list"
 	"encoding/json"
 	"fmt"
 	"i3_stat/internal/logger"
@@ -20,18 +21,23 @@ const (
 )
 
 type Service struct {
-	compareAPIKey string
-	log           logger.AppLogger
-	priceMU       *sync.RWMutex
-	observePrice  []models.Coin
-	observeList   []string
+	compareAPIKeys   *list.List
+	compareAPIKeysMU *sync.Mutex
+	log              logger.AppLogger
+	priceMU          *sync.RWMutex
+	observePrice     []models.Coin
+	observeList      []string
 }
 
-func InitService(log logger.AppLogger, compareAPIKey string) *Service {
+func InitService(log logger.AppLogger, compareAPIKey []string) *Service {
+	apiList := list.New()
+	for _, key := range compareAPIKey {
+		apiList.PushBack(key)
+	}
 	srv := &Service{
-		compareAPIKey: compareAPIKey,
-		log:           log.With(zap.String("service", "sampler")),
-		priceMU:       &sync.RWMutex{},
+		compareAPIKeys: apiList,
+		log:            log.With(zap.String("service", "sampler")),
+		priceMU:        &sync.RWMutex{},
 		observeList: []string{
 			models.Bitcoin,
 			models.Ethereum,
@@ -52,8 +58,6 @@ func (s *Service) observePrices() {
 	ticker := time.NewTicker(15 * time.Second)
 	for range ticker.C {
 		go s.getPrices()
-		println(s.GetState())
-
 	}
 }
 
@@ -72,12 +76,20 @@ func (s *Service) getPrices() {
 	}
 }
 
+func (s *Service) getAPIKey() string {
+	s.compareAPIKeysMU.Lock()
+	defer s.compareAPIKeysMU.Unlock()
+	key := s.compareAPIKeys.Front()
+	s.compareAPIKeys.MoveToBack(key)
+	return key.Value.(string)
+}
+
 func (s *Service) loadPrice(targetCurrency string) (float64, error) {
 	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s?fsym=%s&tsyms=USD", baseDomain, targetCurrency), http.NoBody)
 	if err != nil {
 		return 0, fmt.Errorf("failed to create request: %w", err)
 	}
-	req.Header.Set("authorization", "Apikey "+s.compareAPIKey)
+	req.Header.Set("authorization", "Apikey "+s.getAPIKey())
 	client := http.DefaultClient
 	resp, err := client.Do(req)
 	if err != nil {
