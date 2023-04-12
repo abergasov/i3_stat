@@ -65,7 +65,6 @@ func (s *Service) getPrices() {
 		go func(index int, ticker string) {
 			assetPrice, err := s.loadPrice(ticker)
 			if err != nil {
-				s.log.Error("failed to load price", err, zap.String("ticker", ticker))
 				return
 			}
 			s.priceMU.Lock()
@@ -114,7 +113,7 @@ func (s *Service) loadPrice(targetCurrency string) (float64, error) {
 	}
 	var res map[string]float64
 	if err = json.Unmarshal(b, &res); err != nil {
-		s.log.Error("failed to unmarshal response body", err, zap.Int("code", resp.StatusCode), zap.String("api", apiKey))
+		s.log.Error("failed to unmarshal response body", err, zap.Int("code", resp.StatusCode), zap.String("api", apiKey[:5]), zap.String("ticker", targetCurrency))
 		return 0, fmt.Errorf("failed to unmarshal response body: %w", err)
 	}
 	return res["USD"], nil
