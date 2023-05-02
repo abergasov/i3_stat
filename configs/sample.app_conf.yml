@@ -10,3 +10,6 @@ conf_db:
   pass: AOifjwelmc8dw
   db_name: sybill
   max_connections: 10
+telegramist:
+  token: 123456789:ABC-DEF1234ghIkl-zyx57W2v1u123ew11
+  chat_id: 123456789

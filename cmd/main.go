@@ -7,6 +7,7 @@ import (
 	"i3_stat/internal/logger"
 	"i3_stat/internal/routes"
 	samplerService "i3_stat/internal/service/sampler"
+	"i3_stat/internal/service/telegramist"
 	"i3_stat/internal/storage/database"
 	"log"
 	"os"
@@ -36,9 +37,10 @@ func main() {
 
 	appLog.Info("init services")
 	service := samplerService.InitService(appLog, appConf.CryptocompareAPIKey)
+	sender := telegramist.NewSender(appConf.Telegramist.Token, appConf.Telegramist.Chat)
 
 	appLog.Info("init http service")
-	appHTTPServer := routes.InitAppRouter(appLog, service, fmt.Sprintf(":%d", appConf.AppPort))
+	appHTTPServer := routes.InitAppRouter(appLog, service, sender, fmt.Sprintf(":%d", appConf.AppPort))
 	defer func() {
 		if err = appHTTPServer.Stop(); err != nil {
 			appLog.Fatal("unable to stop http service", err)

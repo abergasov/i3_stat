@@ -10,11 +10,12 @@ import (
 )
 
 type AppConfig struct {
-	AppPort             int       `yaml:"app_port"`
-	MigratesFolder      string    `yaml:"migrates_folder"`
-	CryptocompareAPIKey []string  `yaml:"cryptocompare_api_key"`
-	ConfigDB            DBConf    `yaml:"conf_db"`
-	ConfigGraph         GraphConf `yaml:"conf_graph"`
+	AppPort             int         `yaml:"app_port"`
+	MigratesFolder      string      `yaml:"migrates_folder"`
+	CryptocompareAPIKey []string    `yaml:"cryptocompare_api_key"`
+	ConfigDB            DBConf      `yaml:"conf_db"`
+	ConfigGraph         GraphConf   `yaml:"conf_graph"`
+	Telegramist         Telegramist `yaml:"telegramist"`
 }
 
 type GraphConf struct {
@@ -33,6 +34,11 @@ type DBConf struct {
 	Pass           string `yaml:"pass"`
 	DBName         string `yaml:"db_name"`
 	MaxConnections int    `yaml:"max_connections"`
+}
+
+type Telegramist struct {
+	Token string `yaml:"token"`
+	Chat  string `yaml:"chat"`
 }
 
 func InitConf(confFile string) (*AppConfig, error) {
