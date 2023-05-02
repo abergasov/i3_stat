@@ -30,8 +30,8 @@ func NewSender(token, chat string) *Sender {
 	}
 }
 
-func (s *Sender) InstantMessage(message entities.Message) {
-	s.send(s.chat, map[uint32]entities.Message{0: message})
+func (s *Sender) InstantMessage(message string) {
+	s.sendTelegram(s.chat, message)
 }
 
 func (s *Sender) HandleMessage(message entities.Message) {
@@ -70,18 +70,22 @@ func (s *Sender) processInfo() {
 
 func (s *Sender) send(chat string, messages map[uint32]entities.Message) {
 	for _, message := range s.prepareMessages(messages) {
-		requestBody, _ := json.Marshal(map[string]string{
-			"chat_id": chat,
-			"text":    message,
-		})
-		body, err := http.Post(s.apiURL, "application/json", bytes.NewBuffer(requestBody))
-		if err != nil {
-			log.Println("Error while sending message to telegram", err)
-			continue
-		}
-		if err = body.Body.Close(); err != nil {
-			log.Println("Error while closing response body", err)
-		}
+		s.sendTelegram(chat, message)
+	}
+}
+
+func (s *Sender) sendTelegram(chat, message string) {
+	requestBody, _ := json.Marshal(map[string]string{
+		"chat_id": chat,
+		"text":    message,
+	})
+	body, err := http.Post(s.apiURL, "application/json", bytes.NewBuffer(requestBody))
+	if err != nil {
+		log.Println("Error while sending message to telegram", err)
+		return
+	}
+	if err = body.Body.Close(); err != nil {
+		log.Println("Error while closing response body", err)
 	}
 }
 

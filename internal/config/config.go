@@ -38,7 +38,7 @@ type DBConf struct {
 
 type Telegramist struct {
 	Token string `yaml:"token"`
-	Chat  string `yaml:"chat"`
+	Chat  string `yaml:"chat_id"`
 }
 
 func InitConf(confFile string) (*AppConfig, error) {

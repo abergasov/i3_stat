@@ -51,10 +51,7 @@ func (s *Server) initRoutes() {
 		if err := c.BodyParser(payload); err != nil {
 			return c.SendStatus(fiber.StatusBadRequest)
 		}
-		s.sender.InstantMessage(entities.Message{
-			Messages: []string{payload.Message},
-			Time:     time.Now(),
-		})
+		s.sender.InstantMessage(payload.Message)
 		return c.SendString("ok")
 	})
 	s.httpEngine.Post("/message", func(c *fiber.Ctx) error {

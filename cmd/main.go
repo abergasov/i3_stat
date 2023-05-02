@@ -38,6 +38,7 @@ func main() {
 	appLog.Info("init services")
 	service := samplerService.InitService(appLog, appConf.CryptocompareAPIKey)
 	sender := telegramist.NewSender(appConf.Telegramist.Token, appConf.Telegramist.Chat)
+	go sender.Start()
 
 	appLog.Info("init http service")
 	appHTTPServer := routes.InitAppRouter(appLog, service, sender, fmt.Sprintf(":%d", appConf.AppPort))
