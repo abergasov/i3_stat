@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"encoding/base64"
 	"i3_stat/internal/entities"
 	"i3_stat/internal/logger"
 	"i3_stat/internal/service/sampler"
@@ -42,25 +43,21 @@ func (s *Server) initRoutes() {
 		return ctx.SendString(s.service.GetState())
 	})
 
-	type senderMessage struct {
-		Message string `json:"message"`
-	}
-
 	s.httpEngine.Post("/instant_message", func(c *fiber.Ctx) error {
-		payload := new(senderMessage)
-		if err := c.BodyParser(payload); err != nil {
+		decodedBytes, err := base64.StdEncoding.DecodeString(string(c.Body()))
+		if err != nil {
 			return c.SendStatus(fiber.StatusBadRequest)
 		}
-		s.sender.InstantMessage(payload.Message)
+		s.sender.InstantMessage(string(decodedBytes))
 		return c.SendString("ok")
 	})
 	s.httpEngine.Post("/message", func(c *fiber.Ctx) error {
-		payload := new(senderMessage)
-		if err := c.BodyParser(payload); err != nil {
+		decodedBytes, err := base64.StdEncoding.DecodeString(string(c.Body()))
+		if err != nil {
 			return c.SendStatus(fiber.StatusBadRequest)
 		}
 		s.sender.HandleMessage(entities.Message{
-			Messages: []string{payload.Message},
+			Messages: []string{string(decodedBytes)},
 			Time:     time.Now(),
 		})
 		return c.SendString("ok")
