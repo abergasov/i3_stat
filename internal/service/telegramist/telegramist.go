@@ -77,7 +77,7 @@ func (s *Sender) send(chat string, messages map[uint32]entities.Message) {
 func (s *Sender) sendTelegram(chat, message string) {
 	requestBody, _ := json.Marshal(map[string]string{
 		"chat_id": chat,
-		"text":    "```" + message + "```",
+		"text":    message,
 	})
 	body, err := http.Post(s.apiURL, "application/json", bytes.NewBuffer(requestBody))
 	if err != nil {
