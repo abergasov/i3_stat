@@ -54,7 +54,7 @@ func InitService(log logger.AppLogger, compareAPIKey []string) *Service {
 
 func (s *Service) observePrices() {
 	go s.getPrices()
-	ticker := time.NewTicker(60 * time.Second)
+	ticker := time.NewTicker(180 * time.Second)
 	for range ticker.C {
 		go s.getPrices()
 	}
