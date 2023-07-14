@@ -25,6 +25,7 @@ type Service struct {
 	compareAPIKeysMU sync.Mutex
 	log              logger.AppLogger
 	priceMU          sync.RWMutex
+	lastPriceRequest time.Time
 	observePrice     []models.Coin
 	observeList      []string
 }
@@ -61,6 +62,12 @@ func (s *Service) observePrices() {
 }
 
 func (s *Service) getPrices() {
+	s.priceMU.RLock()
+	lt := s.lastPriceRequest
+	s.priceMU.RUnlock()
+	if time.Since(lt) > 3*time.Minute { // 3 minutes nobody request price
+		return
+	}
 	for i := range s.observeList {
 		go func(index int, ticker string) {
 			assetPrice, err := s.loadPrice(ticker)
@@ -113,15 +120,16 @@ func (s *Service) loadPrice(targetCurrency string) (float64, error) {
 	}
 	var res map[string]float64
 	if err = json.Unmarshal(b, &res); err != nil {
-		s.log.Error("unmarshal response", err, zap.Int("code", resp.StatusCode), zap.String("api", apiKey[:5]), zap.String("ticker", targetCurrency))
+		s.log.Error("unmarshal response", err, zap.String("time", time.Now().Format("Jan _2 15:04")), zap.Int("code", resp.StatusCode), zap.String("api", apiKey[:5]), zap.String("ticker", targetCurrency))
 		return 0, fmt.Errorf("failed to unmarshal response body: %w", err)
 	}
 	return res["USD"], nil
 }
 
 func (s *Service) GetState() string {
-	s.priceMU.RLock()
-	defer s.priceMU.RUnlock()
+	s.priceMU.Lock()
+	defer s.priceMU.Unlock()
+	s.lastPriceRequest = time.Now()
 	stringsList := make([]string, 0, len(s.observeList))
 	for _, t := range s.observePrice {
 		stringsList = append(stringsList, fmt.Sprintf("%s: %.2f", t.Ticker, t.Price))

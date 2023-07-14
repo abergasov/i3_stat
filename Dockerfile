@@ -1,4 +1,4 @@
-FROM golang:1.19 AS build
+FROM golang:1.20 AS build
 RUN echo "Based on commit: $GIT_HASH"
 
 # All these steps will be cached
